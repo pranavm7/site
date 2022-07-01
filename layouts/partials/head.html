@@ -10,7 +10,17 @@
     end }}
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="shortcut icon" type="image/png" href="{{$.Site.BaseURL}}/icon.png" />
+
+  <!-- HTML Favicon -->
+  {{ $favicon := $.Site.Data.config.favicon | default (slice (dict "rel" "shortcut icon" "type" "image/png" "href" "icon.png")) }}
+  {{ $type := (printf "%T" $favicon) }}
+  {{ if eq $type "string" }}
+  {{ $favicon | safeHTML }}
+  {{ else }}
+  {{ range $favicon }}
+  <link rel="{{.rel}}" {{if .type}}type="{{.type}}"{{end}} {{if .sizes}}sizes="{{.sizes}}"{{end}} href="{{$.Site.BaseURL}}/{{.href}}" />
+  {{- end }}
+  {{ end }}
 
   <!-- CSS Stylesheets and Fonts -->
   <link
@@ -60,7 +70,7 @@
       const render = () => {
       // NOTE: everything within this callback will be executed for every page navigation. This is a good place to put JavaScript that loads or modifies data on the page, adds event listeners, etc. If you are only dealing with basic DOM replacement, use the init function
 
-      const siteBaseURL = new URL({{$.Site.BaseURL}});
+      const siteBaseURL = new URL(BASE_URL);
       const pathBase = siteBaseURL.pathname;
       const pathWindow = window.location.pathname;
       const isHome = pathBase == pathWindow;
