@@ -2,7 +2,7 @@
 title: 🚀 Hello World!
 ---
 
-:wave: Hello there fellow cyber-traveler! My name is Pranav Mahajan and welcome to my space on the internet. I built this site in order to share my knowledge as I learn new things, hopefully you might find something useful from it as well.
+👋 Hello there fellow cyber-traveler! My name is Pranav Mahajan and welcome to my space on the internet. I built this site in order to share my knowledge as I learn new things, hopefully you might find something useful from it as well.
 
 I will be cleaning this site in the upcoming days, see you soon!
 
