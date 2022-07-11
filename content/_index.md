@@ -9,8 +9,8 @@ I will be cleaning this site in the upcoming days, see you soon!
 
 Here are features I will be working on for this site:
 
-[ ] Add a "Contact me" section
-[ ] Add some more content
-[ ] Figure out media storage!
+- [ ] Add a "Contact me" section
+- [ ] Add some more content 
+- [ ] Figure out media storage!
 
 Here is the [[/moc_quartz|MOC for Quartz]] 
