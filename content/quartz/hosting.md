@@ -5,6 +5,9 @@ tags:
 ---
 
 ## GitHub Pages
+
+^6ae136
+
 Quartz is designed to be effortless to deploy. If you forked and cloned Quartz directly from the repository, everything should already be good to go! Follow the steps below.
 
 ### Enable GitHub Actions
