@@ -1,8 +1,8 @@
 .DS_Store
+.vscode
 public
 resources
 .idea
 content/.obsidian
-content/private/*
 assets/indices/linkIndex.json
 assets/indices/contentIndex.json

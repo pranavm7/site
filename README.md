@@ -1,5 +1,7 @@
 # Quartz
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c955d12e-172e-47a8-a565-109fc26c9d07/deploy-status)](https://app.netlify.com/sites/pranavm7/deploys)
+
 Host your second brain and [digital garden](https://jzhao.xyz/posts/digital-gardening) for free. Quartz features
 
 1. Extremely fast full-text search by pressing `Ctrl` + `k`
