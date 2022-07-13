@@ -40,9 +40,15 @@
   <script src="{{$darkMode.Permalink}}"></script>
   {{partial "katex.html" .}}
 
-  {{ $popover := resources.Get "js/popover.js" | resources.Fingerprint "md5" |
-  resources.Minify }}
+  {{ $popover := resources.Get "js/popover.js" | resources.Fingerprint "md5" | resources.Minify }}
   <script src="{{$popover.Permalink}}"></script>
+
+  <!-- Adds the js and css for copy to clipboard button -->
+  {{ if (findRE "<pre" .Content 1) }}
+    {{ $clipboard := resources.Get "js/clipboard.js" | resources.Fingerprint "md5" | resources.Minify}}
+    <script src="{{$clipboard.Permalink}}"></script>
+  {{ end }}
+  
 
   <!--  Preload page vars  -->
   {{$linkIndex := resources.Get "indices/linkIndex.json" | resources.Fingerprint
