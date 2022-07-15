@@ -37,17 +37,15 @@
   <link href="{{$finalCss.Permalink}}" rel="stylesheet" />
 
   {{ $darkMode := resources.Get "js/darkmode.js" | resources.Fingerprint "md5" | resources.Minify }}
-  <script src="{{$darkMode.Permalink}}"></script>
+  <script defer src="{{$darkMode.Permalink}}"></script>
   {{partial "katex.html" .}}
 
   {{ $popover := resources.Get "js/popover.js" | resources.Fingerprint "md5" | resources.Minify }}
-  <script src="{{$popover.Permalink}}"></script>
+  <script defer src="{{$popover.Permalink}}"></script>
 
   <!-- Adds the js and css for copy to clipboard button -->
-  {{ if (findRE "<pre" .Content 1) }}
-    {{ $clipboard := resources.Get "js/clipboard.js" | resources.Fingerprint "md5" | resources.Minify}}
-    <script src="{{$clipboard.Permalink}}"></script>
-  {{ end }}
+  {{ $clipboard := resources.Get "js/clipboard.js" | resources.Fingerprint "md5"  }}
+  <script defer src="{{$clipboard.Permalink}}"></script>
   
 
   <!--  Preload page vars  -->
@@ -75,7 +73,7 @@
 
       const render = () => {
       // NOTE: everything within this callback will be executed for every page navigation. This is a good place to put JavaScript that loads or modifies data on the page, adds event listeners, etc. If you are only dealing with basic DOM replacement, use the init function
-
+      
       const siteBaseURL = new URL(BASE_URL);
       const pathBase = siteBaseURL.pathname;
       const pathWindow = window.location.pathname;
@@ -87,6 +85,9 @@
       if (!container) return requestAnimationFrame(render)
       // clear the graph in case there is anything within it
       container.textContent = ""
+      
+      // add the copy to clipboard button
+      addClipboard();
 
       const drawGlobal = isHome && {{$.Site.Data.graphConfig.enableGlobalGraph}};
       drawGraph(
@@ -138,4 +139,3 @@
   </script>
   {{end}}
 </head>
-<!--{{ template "_internal/google_analytics.html" . }}-->
