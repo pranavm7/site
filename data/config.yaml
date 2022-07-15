@@ -1,12 +1,14 @@
 name: Pranav Mahajan
 enableToc: true
 openToc: false
-enableLinkPreview: true
 enableLatex: true
+enableCodeBlockTitle: true
+enableCodeBlockCopy: true
 enableSPA: true
 enableFooter: true
 enableContextualBacklinks: true
 enableRecentNotes: false
+enableGitHubEdit: false
 description:
   Hello there! My name is Pranav Mahajan and I am an aspiring cybersecurity professional 
 page_title:
