@@ -25,9 +25,10 @@ const addCopyButtons = () => {
                 () => {
                     button.blur();
                     button.innerHTML = svgCheck;
-                    button.style.borderColor = "#3fb950";
-                    setTimeout(() => {button.innerHTML = svgCopy;button.style.borderColor = "";}, 2000);
-                    
+                    setTimeout(() => {
+                    	button.innerHTML = svgCopy
+                    	button.style.borderColor = ""
+                    }, 2000);
                 },
                 (error) => (button.innerHTML = "Error")
             );
