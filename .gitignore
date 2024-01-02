@@ -1,8 +1,11 @@
 .DS_Store
-.vscode
+.gitignore
+node_modules
 public
-resources
-.idea
-content/.obsidian
-assets/indices/linkIndex.json
-assets/indices/contentIndex.json
+prof
+tsconfig.tsbuildinfo
+.obsidian
+.quartz-cache
+private/
+.replit
+replit.nix
