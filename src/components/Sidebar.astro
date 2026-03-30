@@ -1,0 +1,178 @@
+---
+import { getCollection } from 'astro:content';
+import { SITE_TITLE, CV_PAGE_META, CV_DEFAULT_ICON, EXTERNAL_LINKS } from '../config/nav';
+
+interface Props {
+  currentPath: string;
+}
+const { currentPath } = Astro.props;
+
+// ─── Blog posts ───────────────────────────────
+// Derived entirely from Content Collections.
+// Adding a .md file to src/content/blog/ is all that's needed.
+const blogPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// ─── CV pages ────────────────────────────────
+// Discovered via import.meta.glob — any .astro file in src/pages/cv/
+// is automatically included. Order follows CV_PAGE_META, then alphabetical.
+const cvGlob = import.meta.glob('../pages/cv/*.astro');
+
+const cvPages = Object.keys(cvGlob)
+  .map(filePath => {
+    // '../pages/cv/experience.astro' → 'experience'
+    const name = filePath.replace('../pages/cv/', '').replace('.astro', '');
+    const meta = CV_PAGE_META[name];
+    return {
+      name,
+      label:  meta?.label ?? `${name}.astro`,
+      href:   name === 'index' ? '/cv' : `/cv/${name}`,
+      icon:   meta?.icon ?? CV_DEFAULT_ICON,
+      order:  Object.keys(CV_PAGE_META).indexOf(name), // -1 if not in config
+    };
+  })
+  .sort((a, b) => {
+    // Listed items first (in config order), unlisted items alphabetically after
+    const aIdx = a.order === -1 ? Infinity : a.order;
+    const bIdx = b.order === -1 ? Infinity : b.order;
+    if (aIdx !== bIdx) return aIdx - bIdx;
+    return a.name.localeCompare(b.name);
+  });
+
+// ─── Tree prefix helpers ──────────────────────
+function prefixes<T>(arr: T[]): ('├──' | '└──')[] {
+  return arr.map((_, i) => (i === arr.length - 1 ? '└──' : '├──'));
+}
+
+const cvPrefixes   = prefixes(cvPages);
+const blogPrefixes = prefixes(blogPosts);         // posts only (index handled separately)
+const extPrefixes  = prefixes(EXTERNAL_LINKS);
+---
+
+<aside id="sidebar" aria-label="Site navigation" data-pagefind-ignore>
+  <div id="sidebar-header">
+    <span id="sidebar-title">{SITE_TITLE}</span>
+    <button id="sidebar-close" aria-label="Close sidebar" title="Close sidebar">✕</button>
+  </div>
+
+  <nav id="sidebar-nav" aria-label="File tree">
+
+    <!-- ── Home ── -->
+    <div class="tree-section">
+      <button class="tree-label" aria-expanded="true" aria-controls="sec-home" data-section="home">
+        <span class="arrow" aria-hidden="true">▼</span>~/
+      </button>
+      <div class="tree-children" id="sec-home" role="list">
+        <a
+          class={`tree-item${currentPath === '/' ? ' active' : ''}`}
+          href="/"
+          role="listitem"
+          aria-current={currentPath === '/' ? 'page' : undefined}
+        >
+          <span class="prefix" aria-hidden="true">└──</span>
+          <span class="icon"   aria-hidden="true">🏠</span>
+          <span class="label">index.astro</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── CV ── -->
+    {cvPages.length > 0 && (
+      <div class="tree-section">
+        <button class="tree-label" aria-expanded="true" aria-controls="sec-cv" data-section="cv">
+          <span class="arrow" aria-hidden="true">▼</span>cv/
+        </button>
+        <div class="tree-children" id="sec-cv" role="list">
+          {cvPages.map((page, i) => (
+            <a
+              class={`tree-item${currentPath === page.href ? ' active' : ''}`}
+              href={page.href}
+              role="listitem"
+              aria-current={currentPath === page.href ? 'page' : undefined}
+            >
+              <span class="prefix" aria-hidden="true">{cvPrefixes[i]}</span>
+              <span class="icon"   aria-hidden="true">{page.icon}</span>
+              <span class="label">{page.label}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- ── Blog ── -->
+    <div class="tree-section">
+      <button class="tree-label" aria-expanded="true" aria-controls="sec-blog" data-section="blog">
+        <span class="arrow" aria-hidden="true">▼</span>blog/
+      </button>
+      <div class="tree-children" id="sec-blog" role="list">
+        <!-- index always first -->
+        <a
+          class={`tree-item${currentPath === '/blog' ? ' active' : ''}`}
+          href="/blog"
+          role="listitem"
+          aria-current={currentPath === '/blog' ? 'page' : undefined}
+        >
+          <span class="prefix" aria-hidden="true">{blogPosts.length > 0 ? '├──' : '└──'}</span>
+          <span class="icon"   aria-hidden="true">📄</span>
+          <span class="label">index.astro</span>
+        </a>
+        <!-- one entry per post, newest first -->
+        {blogPosts.map((post, i) => (
+          <a
+            class={`tree-item${currentPath === `/blog/${post.slug}` ? ' active' : ''}`}
+            href={`/blog/${post.slug}`}
+            role="listitem"
+            aria-current={currentPath === `/blog/${post.slug}` ? 'page' : undefined}
+          >
+            <span class="prefix" aria-hidden="true">{blogPrefixes[i]}</span>
+            <span class="icon"   aria-hidden="true">📝</span>
+            <span class="label">{post.slug}.md</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="sidebar-divider" role="separator"></div>
+
+    <!-- ── External ── -->
+    {EXTERNAL_LINKS.length > 0 && (
+      <div class="tree-section">
+        <button class="tree-label" aria-expanded="true" aria-controls="sec-ext" data-section="ext">
+          <span class="arrow" aria-hidden="true">▼</span>external/
+        </button>
+        <div class="tree-children" id="sec-ext" role="list">
+          {EXTERNAL_LINKS.map((link, i) => (
+            <a
+              class="tree-item"
+              href={link.href}
+              role="listitem"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="prefix" aria-hidden="true">{extPrefixes[i]}</span>
+              <span class="icon"   aria-hidden="true">{link.icon}</span>
+              <span class="label">{link.label}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div class="sidebar-divider" role="separator"></div>
+
+    <!-- ── Config ── -->
+    <div class="tree-section">
+      <button class="tree-label" aria-expanded="true" aria-controls="sec-config" data-section="config">
+        <span class="arrow" aria-hidden="true">▼</span>config/
+      </button>
+      <div class="tree-children" id="sec-config" role="list">
+        <button class="tree-item" id="open-theme-modal" aria-haspopup="dialog">
+          <span class="prefix" aria-hidden="true">└──</span>
+          <span class="icon"   aria-hidden="true">🎨</span>
+          <span class="label">themes.json</span>
+        </button>
+      </div>
+    </div>
+
+  </nav>
+</aside>

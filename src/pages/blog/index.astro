@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Fetch all non-draft posts, newest first
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function fmtDate(d: Date) {
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+---
+
+<BaseLayout title="Blog" currentPath="/blog">
+  <div class="blog-page">
+    <div class="page-header">
+      <h1><span>~/blog</span></h1>
+      <p class="subtitle">Engineering insights, tooling deep-dives, and things I find interesting.</p>
+    </div>
+
+    <div class="post-list">
+      {posts.map(post => (
+        <a class="post-card" href={`/blog/${post.slug}`}>
+          <div class="post-meta">
+            <span class="post-date">{fmtDate(post.data.date)}</span>
+            {post.data.tags.map(tag => (
+              <span class="post-tag">{tag}</span>
+            ))}
+          </div>
+          <div class="post-title">{post.data.title}</div>
+          <div class="post-excerpt">{post.data.description}</div>
+          <div class="post-read-more">→ Read more</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

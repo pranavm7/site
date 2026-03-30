@@ -1,0 +1,30 @@
+---
+interface Props {
+    currentPath: string;
+}
+const { currentPath } = Astro.props;
+---
+
+<div
+    id="statusbar"
+    role="status"
+    aria-live="polite"
+    aria-label="Editor status"
+    data-pagefind-ignore
+>
+    <div class="status-seg mode" aria-label="Mode">NORMAL</div>
+    <div class="status-seg branch hide-sm" aria-label="Branch">⇛ main</div>
+    <div class="status-seg path" aria-label="Current path">{currentPath}</div>
+    <!-- right-aligned group -->
+    <div
+        class="status-seg right hide-sm"
+        id="status-theme"
+        aria-label="Active theme"
+    >
+        catppuccin-mocha
+    </div>
+    <div class="status-seg hide-sm" aria-label="Encoding">UTF-8</div>
+    <div class="status-seg" id="status-time" aria-label="Current time">
+        --:--
+    </div>
+</div>

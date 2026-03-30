@@ -1,0 +1,1016 @@
+/* ─────────────────────────────────────────────
+   THEMES
+   ───────────────────────────────────────────── */
+
+:root,
+:root[data-theme="catppuccin-mocha"] {
+  --bg:        #1e1e2e;
+  --bg-alt:    #181825;
+  --bg-panel:  #313244;
+  --border:    #45475a;
+  --text:      #cdd6f4;
+  --text-muted:#6c7086;
+  --accent:    #89b4fa;
+  --accent2:   #cba6f7;
+  --green:     #a6e3a1;
+  --yellow:    #f9e2af;
+  --red:       #f38ba8;
+  --pink:      #f5c2e7;
+}
+
+:root[data-theme="nord"] {
+  --bg:        #2e3440;
+  --bg-alt:    #242933;
+  --bg-panel:  #3b4252;
+  --border:    #4c566a;
+  --text:      #eceff4;
+  --text-muted:#4c566a;
+  --accent:    #88c0d0;
+  --accent2:   #81a1c1;
+  --green:     #a3be8c;
+  --yellow:    #ebcb8b;
+  --red:       #bf616a;
+  --pink:      #b48ead;
+}
+
+:root[data-theme="dracula"] {
+  --bg:        #282a36;
+  --bg-alt:    #1e1f29;
+  --bg-panel:  #44475a;
+  --border:    #6272a4;
+  --text:      #f8f8f2;
+  --text-muted:#6272a4;
+  --accent:    #8be9fd;
+  --accent2:   #bd93f9;
+  --green:     #50fa7b;
+  --yellow:    #f1fa8c;
+  --red:       #ff5555;
+  --pink:      #ff79c6;
+}
+
+:root[data-theme="tokyo-night"] {
+  --bg:        #1a1b26;
+  --bg-alt:    #16161e;
+  --bg-panel:  #24283b;
+  --border:    #414868;
+  --text:      #c0caf5;
+  --text-muted:#565f89;
+  --accent:    #7aa2f7;
+  --accent2:   #bb9af7;
+  --green:     #9ece6a;
+  --yellow:    #e0af68;
+  --red:       #f7768e;
+  --pink:      #ff007c;
+}
+
+:root[data-theme="gruvbox"] {
+  --bg:        #282828;
+  --bg-alt:    #1d2021;
+  --bg-panel:  #3c3836;
+  --border:    #504945;
+  --text:      #ebdbb2;
+  --text-muted:#7c6f64;
+  --accent:    #83a598;
+  --accent2:   #d3869b;
+  --green:     #b8bb26;
+  --yellow:    #fabd2f;
+  --red:       #fb4934;
+  --pink:      #d3869b;
+}
+
+/* ─────────────────────────────────────────────
+   BASE RESET
+   ───────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  /* Prevent the outer page from scrolling.
+     All scrolling happens inside #content. */
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  color: var(--accent2);
+}
+
+/* ─────────────────────────────────────────────
+   SHELL  —  flex row, sidebar | main
+   ─────────────────────────────────────────────
+   Using flex (not grid) because we need the
+   sidebar to genuinely collapse out of flow
+   with a width/flex-basis transition.
+   ───────────────────────────────────────────── */
+
+#shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   SIDEBAR
+   ───────────────────────────────────────────── */
+
+#sidebar {
+  /* Fixed flex size — does not grow or shrink unless we say so */
+  flex: 0 0 260px;
+  /* min-width: 0 lets the flex item shrink below its content width */
+  min-width: 0;
+  overflow: hidden;
+  background: var(--bg-alt);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  /* Animate both flex-basis and width together for smooth collapse */
+  transition: flex-basis 0.22s ease, width 0.22s ease, border-color 0.22s ease;
+  /* Keep sidebar above content on narrow layouts */
+  z-index: 10;
+}
+
+/* Desktop collapsed — triggered by .sidebar-collapsed on #shell */
+#shell.sidebar-collapsed #sidebar {
+  flex-basis: 0;
+  border-right-color: transparent;
+}
+
+#sidebar-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  /* Prevent header text from wrapping when sidebar is animating closed */
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#sidebar-title {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 13px;
+}
+
+#sidebar-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+#sidebar-close:hover { color: var(--red); background: var(--bg-panel); }
+
+#sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tree-section { margin-bottom: 4px; }
+
+/* tree-label is a <button> — reset button styles, then apply tree look */
+.tree-label {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.tree-label:hover { color: var(--text); }
+
+.tree-label .arrow {
+  font-size: 10px;
+  display: inline-block;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.tree-label.open .arrow     { transform: rotate(0deg); }
+.tree-label:not(.open) .arrow { transform: rotate(-90deg); }
+
+.tree-children { overflow: hidden; }
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 14px 3px 28px;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.1s;
+  /* Reset button-specific styles when tree-item is on a <button> */
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.tree-item:hover,
+.tree-item.active {
+  background: var(--bg-panel);
+  color: var(--accent);
+  text-decoration: none;
+}
+.tree-item .prefix { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
+.tree-item .icon   { font-size: 12px; flex-shrink: 0; }
+.tree-item .label  { overflow: hidden; text-overflow: ellipsis; }
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 14px;
+}
+
+/* ─────────────────────────────────────────────
+   MOBILE SIDEBAR OVERLAY
+   Sidebar slides in over content.
+   The backdrop (#sidebar-overlay) dims content.
+   ───────────────────────────────────────────── */
+
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 149;
+  /* Animate opacity so the backdrop fades in/out */
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+#sidebar-overlay.visible {
+  display: block;
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────
+   MAIN PANEL  (tabbar + content + statusbar)
+   ───────────────────────────────────────────── */
+
+#main {
+  /* Take all remaining horizontal space; never overflow */
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ─── Tabbar ─── */
+
+#tabbar {
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-height: 34px;
+}
+#tabbar::-webkit-scrollbar { display: none; }
+
+#sidebar-toggle {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  /* Comfortable tap target */
+  padding: 0 14px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+#sidebar-toggle:hover { color: var(--accent); background: var(--bg-panel); }
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.1s, color 0.1s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+.tab:hover { color: var(--text); background: var(--bg-panel); text-decoration: none; }
+.tab.active {
+  color: var(--text);
+  background: var(--bg);
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: -1px;
+}
+.tab .tab-dot { color: var(--accent); font-size: 10px; flex-shrink: 0; }
+.tab .tab-dir { color: var(--text-muted); }
+.tab .tab-path { overflow: hidden; text-overflow: ellipsis; }
+
+#tabbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  flex-shrink: 0;
+}
+
+#theme-toggle,
+#help-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+#theme-toggle:hover { color: var(--accent2); border-color: var(--accent2); }
+#help-btn:hover     { color: var(--accent);  border-color: var(--accent); }
+
+/* ─── Content ─── */
+
+#content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+#content::-webkit-scrollbar       { width: 6px; }
+#content::-webkit-scrollbar-track { background: transparent; }
+#content::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ─── Statusbar ─── */
+
+#statusbar {
+  display: flex;
+  align-items: stretch;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+  height: 22px;
+  overflow: hidden;
+}
+
+.status-seg {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-seg + .status-seg { border-left: 1px solid rgba(0,0,0,0.2); }
+
+.status-seg.mode   { background: var(--bg);      color: var(--accent);  }
+.status-seg.branch { background: var(--accent2);  color: var(--bg);      }
+.status-seg.path   { background: var(--bg-panel); color: var(--text);    font-weight: normal; overflow: hidden; text-overflow: ellipsis; }
+.status-seg.right  { margin-left: auto; }
+
+/* ─────────────────────────────────────────────
+   PAGE CONTENT AREAS
+   Use clamp() so padding scales with viewport.
+   ───────────────────────────────────────────── */
+
+.blog-page,
+.post-page,
+.cv-page {
+  padding: clamp(16px, 4vw, 32px) clamp(16px, 5vw, 40px);
+}
+
+.blog-page { max-width: 900px; }
+.post-page { max-width: 800px; }
+.cv-page   { max-width: 960px; }
+
+/* Blog index */
+.page-header { margin-bottom: 32px; }
+.page-header h1 {
+  font-size: clamp(16px, 3vw, 20px);
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.page-header h1 span { color: var(--accent); }
+.page-header .subtitle { color: var(--text-muted); font-size: 13px; }
+
+.post-list { display: flex; flex-direction: column; }
+
+.post-card {
+  display: block;
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  padding: clamp(14px, 3vw, 20px) clamp(16px, 4vw, 24px);
+  background: var(--bg-alt);
+  transition: border-color 0.15s, background 0.15s;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+.post-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.post-card:hover                { border-color: var(--accent); background: var(--bg-panel); text-decoration: none; color: inherit; }
+.post-card:hover::before        { opacity: 1; }
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.post-date { color: var(--text-muted); font-size: 12px; }
+.post-tag  {
+  font-size: 11px;
+  padding: 1px 8px;
+  border: 1px solid var(--accent2);
+  color: var(--accent2);
+}
+.post-title {
+  font-size: clamp(14px, 2.5vw, 16px);
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.post-excerpt {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.post-read-more {
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Blog post */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 24px;
+  text-decoration: none;
+}
+.back-link:hover { color: var(--accent); }
+
+/* ─────────────────────────────────────────────
+   MODALS
+   ───────────────────────────────────────────── */
+
+#theme-modal,
+#help-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+#theme-modal.open,
+#help-modal.open { display: flex; }
+
+#theme-modal-inner,
+#help-modal-inner {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+#theme-modal-inner { max-width: 380px; }
+#help-modal-inner  { max-width: 440px; }
+
+#theme-modal-header,
+.help-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--accent);
+  position: sticky;
+  top: 0;
+  background: var(--bg-alt);
+}
+
+#theme-modal-close,
+.help-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 2px 6px;
+}
+#theme-modal-close:hover,
+.help-close:hover { color: var(--red); }
+
+#theme-modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.1s, background 0.1s;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+}
+.theme-option:hover  { border-color: var(--accent);  background: var(--bg-panel); }
+.theme-option.active { border-color: var(--accent2); color: var(--accent2); }
+.theme-option .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.help-body { padding: 16px; }
+.help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+}
+.help-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 3px 0;
+}
+.help-key {
+  font-size: 11px;
+  padding: 1px 6px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  white-space: nowrap;
+  font-style: normal;
+  font-family: inherit;
+}
+.help-desc { color: var(--text-muted); }
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE — MOBILE  (≤ 768px)
+   ─────────────────────────────────────────────
+   On mobile:
+   • Sidebar becomes a position:fixed overlay panel
+     that slides in from the left.
+   • #shell stays a flex row but the sidebar is
+     removed from flow (position: fixed), so #main
+     fills the full viewport width automatically.
+   • The sidebar-overlay backdrop sits behind the
+     sidebar and above #main.
+   ───────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Sidebar leaves normal flow — becomes a fixed overlay */
+  #sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;   /* left: 0, top: 0, bottom: 0 */
+    width: 280px;
+    flex-basis: auto;     /* override desktop flex-basis */
+    z-index: 150;
+    /* Slide in/out via transform instead of width */
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    /* Keep the border visible when open */
+    border-right: 1px solid var(--border);
+  }
+
+  #sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Desktop collapse class has no effect on mobile */
+  #shell.sidebar-collapsed #sidebar {
+    flex-basis: auto;
+    border-right-color: var(--border);
+    /* still slides; transform is still the mechanism */
+  }
+
+  /* #main always fills full width since sidebar is out of flow */
+  #main {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  /* Slightly larger tap target for the toggle button */
+  #sidebar-toggle {
+    font-size: 18px;
+    padding: 0 16px;
+  }
+
+  /* Stack help shortcuts to 1 column */
+  .help-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Trim statusbar — hide lower-priority segments */
+  .hide-sm { display: none; }
+
+  /* Give modals more breathing room */
+  #theme-modal,
+  #help-modal {
+    padding: 12px;
+    align-items: flex-end;  /* sheet slides up from bottom on mobile */
+  }
+
+  #theme-modal-inner,
+  #help-modal-inner {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE — NARROW DESKTOP  (769px – 1024px)
+   Keep sidebar open but tighten content padding.
+   ───────────────────────────────────────────── */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  #sidebar { flex-basis: 220px; }
+  #shell.sidebar-collapsed #sidebar { flex-basis: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   UTILITY
+   ───────────────────────────────────────────── */
+
+/* Visually hide but keep accessible for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─────────────────────────────────────────────
+   SEARCH BUTTON (tabbar)
+   ───────────────────────────────────────────── */
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: color 0.1s, background 0.1s;
+  flex-shrink: 0;
+}
+.search-btn:hover {
+  color: var(--accent);
+  background: var(--bg-panel);
+}
+.search-btn-slash {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+.search-btn-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Hide the label text on very small screens, keep the / icon */
+@media (max-width: 480px) {
+  .search-btn-label { display: none; }
+  .search-btn { padding: 0 12px; }
+}
+
+/* ─────────────────────────────────────────────
+   SEARCH MODAL
+   ───────────────────────────────────────────── */
+
+#search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  /* Blurred, dimmed backdrop — the signature effect */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  /* Align panel toward upper-centre — command-palette feel */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10vh;
+  /* Hidden by default — fade + slide in */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+#search-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Terminal window ── */
+#search-modal-inner {
+  width: min(660px, 92vw);
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  /* Slide up into place when opening */
+  transform: translateY(-10px);
+  transition: transform 0.15s ease;
+}
+
+#search-modal.open #search-modal-inner {
+  transform: translateY(0);
+}
+
+/* ── Titlebar ── */
+#search-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.search-dots {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.search-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot-red    { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.dot-green  { background: var(--green); }
+
+.search-title {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+#search-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+#search-close:hover { color: var(--red); }
+
+/* ── Input row ── */
+#search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.search-prompt {
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
+}
+
+#search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  caret-color: var(--accent);
+  min-width: 0;
+}
+#search-input::placeholder { color: var(--text-muted); }
+
+/* Spinner — braille dot cycle driven by JS */
+.search-spinner {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--accent2);
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+}
+
+/* ── Results area ── */
+#search-results-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  /* Minimum height so the window doesn't collapse when empty */
+  min-height: 80px;
+}
+#search-results-wrap::-webkit-scrollbar       { width: 4px; }
+#search-results-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+
+#search-results {
+  padding: 6px 0;
+}
+
+/* Each result */
+.search-result {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 16px 9px 18px;
+  text-decoration: none;
+  color: inherit;
+  border-left: 3px solid transparent;
+  transition: background 0.08s, border-color 0.08s;
+  cursor: pointer;
+}
+.search-result + .search-result {
+  border-top: 1px solid var(--border);
+}
+.search-result:hover,
+.search-result.selected {
+  background: var(--bg-panel);
+  border-left-color: var(--accent);
+  text-decoration: none;
+  color: inherit;
+}
+
+.sr-path {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.sr-title {
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-excerpt {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  /* Two-line clamp */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Empty state */
+#search-results:empty::after {
+  content: '';
+}
+
+/* ── Bottom status bar ── */
+#search-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-panel);
+  flex-shrink: 0;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.search-status-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.search-status-keys {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.search-status-keys kbd {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 1px 5px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  color: var(--accent2);
+}
+
+/* Hide shortcut hint on small screens */
+@media (max-width: 480px) {
+  .search-status-keys { display: none; }
+}

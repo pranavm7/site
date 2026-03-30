@@ -1,0 +1,354 @@
+---
+// SearchModal.astro
+// Self-contained search terminal modal.
+// Exposes window.__searchOpen() and window.__searchClose() for external callers.
+---
+
+<!-- ─── Search backdrop + terminal window ─── -->
+<div
+    id="search-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Search"
+    aria-hidden="true"
+    data-pagefind-ignore
+>
+    <div id="search-modal-inner">
+        <!-- Titlebar -->
+        <div id="search-titlebar" aria-hidden="true">
+            <div class="search-dots">
+                <span class="search-dot dot-red"></span>
+                <span class="search-dot dot-yellow"></span>
+                <span class="search-dot dot-green"></span>
+            </div>
+            <span class="search-title">~/search</span>
+            <button id="search-close" aria-label="Close search">✕</button>
+        </div>
+
+        <!-- Input row -->
+        <div id="search-input-row">
+            <span class="search-prompt" aria-hidden="true">&gt;</span>
+            <input
+                id="search-input"
+                type="text"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="type to search..."
+                aria-label="Search query"
+                aria-autocomplete="list"
+                aria-controls="search-results"
+            />
+            <span
+                id="search-spinner"
+                class="search-spinner"
+                aria-hidden="true"
+                hidden>⠋</span
+            >
+        </div>
+
+        <!-- Results area -->
+        <div id="search-results-wrap">
+            <div id="search-results" role="listbox" aria-label="Search results">
+            </div>
+        </div>
+
+        <!-- Bottom status bar -->
+        <div id="search-statusbar" aria-live="polite">
+            <span id="search-status-text" class="search-status-text"
+                >// pagefind ready</span
+            >
+            <span class="search-status-keys" aria-hidden="true">
+                <kbd>↑↓</kbd> navigate &nbsp; <kbd>↵</kbd> open &nbsp; <kbd
+                    >esc</kbd
+                > close
+            </span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ─────────────────────────────────────────────
+    // State
+    // ─────────────────────────────────────────────
+    let pagefind: any = null;
+    let pagefindReady = false;
+    let pagefindError = false;
+    let selectedIndex = -1;
+    let currentResults: Array<{ url: string; title: string; excerpt: string }> =
+        [];
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    // ─────────────────────────────────────────────
+    // DOM refs (resolved once DOMContentLoaded)
+    // ─────────────────────────────────────────────
+    const modal = document.getElementById("search-modal")!;
+    const inner = document.getElementById("search-modal-inner")!;
+    const input = document.getElementById("search-input") as HTMLInputElement;
+    const resultsEl = document.getElementById("search-results")!;
+    const statusText = document.getElementById("search-status-text")!;
+    const spinner = document.getElementById("search-spinner") as HTMLElement;
+
+    // ─────────────────────────────────────────────
+    // Pagefind loader — lazy, called on first open
+    // ─────────────────────────────────────────────
+    async function loadPagefind() {
+        if (pagefind || pagefindError) return;
+        try {
+            // Construct the path at runtime so Vite's static analyser never sees
+            // a resolvable string literal. Both @vite-ignore and rollupOptions.external
+            // are stripped/missed by Astro's script transform pipeline — this is the
+            // only reliable escape hatch.
+            const pagefindPath = "/pagefind/" + "pagefind.js";
+            pagefind = await import(/* @vite-ignore */ pagefindPath);
+            await pagefind.init();
+            pagefindReady = true;
+            setStatus("// type to search...");
+        } catch {
+            pagefindError = true;
+            setStatus("// run `npm run build` to enable search", true);
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Status helpers
+    // ─────────────────────────────────────────────
+    function setStatus(msg: string, warn = false) {
+        statusText.textContent = msg;
+        statusText.style.color = warn ? "var(--yellow)" : "";
+    }
+
+    // ─────────────────────────────────────────────
+    // Spinner — braille dot cycle
+    // ─────────────────────────────────────────────
+    const SPIN_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    let spinFrame = 0;
+    let spinTimer: ReturnType<typeof setInterval> | null = null;
+
+    function showSpinner(show: boolean) {
+        spinner.hidden = !show;
+        if (show) {
+            if (!spinTimer) {
+                spinTimer = setInterval(() => {
+                    spinFrame = (spinFrame + 1) % SPIN_FRAMES.length;
+                    spinner.textContent = SPIN_FRAMES[spinFrame];
+                }, 80);
+            }
+        } else {
+            if (spinTimer) {
+                clearInterval(spinTimer);
+                spinTimer = null;
+            }
+            spinFrame = 0;
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Render results
+    // ─────────────────────────────────────────────
+    function urlToDisplayPath(url: string): string {
+        return url.replace(/^\//, "").replace(/\/$/, "") || "index";
+    }
+
+    function stripHtml(html: string): string {
+        return html.replace(/<[^>]*>/g, "").trim();
+    }
+
+    function renderResults() {
+        if (currentResults.length === 0) {
+            resultsEl.innerHTML = "";
+            return;
+        }
+
+        resultsEl.innerHTML = currentResults
+            .map((r, i) => {
+                const path = urlToDisplayPath(r.url);
+                const title = r.title || path;
+                const excerpt = r.excerpt ? stripHtml(r.excerpt) : "";
+                const isSelected = i === selectedIndex;
+
+                return `
+      <a
+        class="search-result${isSelected ? " selected" : ""}"
+        href="${r.url}"
+        role="option"
+        aria-selected="${isSelected}"
+        data-index="${i}"
+        tabindex="-1"
+      >
+        <span class="sr-path">${path}</span>
+        <span class="sr-title">${title}</span>
+        ${excerpt ? `<span class="sr-excerpt">${excerpt}</span>` : ""}
+      </a>`;
+            })
+            .join("");
+
+        // Scroll selected item into view
+        const sel = resultsEl.querySelector<HTMLElement>(
+            ".search-result.selected",
+        );
+        sel?.scrollIntoView({ block: "nearest" });
+    }
+
+    // ─────────────────────────────────────────────
+    // Search
+    // ─────────────────────────────────────────────
+    async function runSearch(query: string) {
+        if (!query.trim()) {
+            currentResults = [];
+            selectedIndex = -1;
+            renderResults();
+            setStatus("// type to search...");
+            return;
+        }
+
+        if (!pagefindReady) {
+            setStatus(
+                pagefindError
+                    ? "// run `npm run build` to enable search"
+                    : "// loading search index...",
+                !pagefindReady,
+            );
+            return;
+        }
+
+        showSpinner(true);
+        setStatus("// searching...");
+
+        try {
+            const search = await pagefind.search(query);
+            // Fetch first 10 results in parallel
+            const dataArr = await Promise.all(
+                search.results.slice(0, 10).map((r: any) => r.data()),
+            );
+
+            currentResults = dataArr.map((d: any) => ({
+                url: d.url ?? "#",
+                title: d.meta?.title ?? urlToDisplayPath(d.url ?? ""),
+                excerpt: d.excerpt ?? "",
+            }));
+
+            selectedIndex = currentResults.length > 0 ? 0 : -1;
+            renderResults();
+
+            if (currentResults.length === 0) {
+                setStatus(`// no results for "${query}"`);
+            } else {
+                setStatus(
+                    `// ${currentResults.length} result${currentResults.length === 1 ? "" : "s"} for "${query}"`,
+                );
+            }
+        } catch {
+            setStatus("// search error", true);
+        } finally {
+            showSpinner(false);
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Keyboard navigation within the modal
+    // ─────────────────────────────────────────────
+    function moveSelection(delta: number) {
+        if (currentResults.length === 0) return;
+        selectedIndex = Math.max(
+            0,
+            Math.min(currentResults.length - 1, selectedIndex + delta),
+        );
+        renderResults();
+    }
+
+    function openSelected() {
+        if (selectedIndex >= 0 && currentResults[selectedIndex]) {
+            window.location.href = currentResults[selectedIndex].url;
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Open / Close
+    // ─────────────────────────────────────────────
+    function openSearch() {
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+        // Trigger pagefind load on first open
+        loadPagefind();
+        // Clear any previous query and results
+        input.value = "";
+        currentResults = [];
+        selectedIndex = -1;
+        renderResults();
+        setStatus("// type to search...");
+        requestAnimationFrame(() => input.focus());
+    }
+
+    function closeSearch() {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+        input.value = "";
+        currentResults = [];
+        selectedIndex = -1;
+        renderResults();
+    }
+
+    // ─────────────────────────────────────────────
+    // Expose to BaseLayout keyboard handler
+    // ─────────────────────────────────────────────
+    (window as any).__searchOpen = openSearch;
+    (window as any).__searchClose = closeSearch;
+
+    // ─────────────────────────────────────────────
+    // Event listeners
+    // ─────────────────────────────────────────────
+
+    // Close button
+    document
+        .getElementById("search-close")
+        ?.addEventListener("click", closeSearch);
+
+    // Click outside inner panel closes
+    modal.addEventListener("click", (e) => {
+        if (!inner.contains(e.target as Node)) closeSearch();
+    });
+
+    // Input — debounced search
+    input.addEventListener("input", () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => runSearch(input.value), 200);
+    });
+
+    // Keyboard within modal
+    input.addEventListener("keydown", (e) => {
+        switch (e.key) {
+            case "Escape":
+                e.preventDefault();
+                closeSearch();
+                break;
+            case "ArrowDown":
+                e.preventDefault();
+                moveSelection(1);
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                moveSelection(-1);
+                break;
+            case "Enter":
+                e.preventDefault();
+                openSelected();
+                break;
+        }
+    });
+
+    // Clicking a result navigates (handled by <a href>), but ensure mouse hover updates selection
+    resultsEl.addEventListener("mousemove", (e) => {
+        const target = (e.target as HTMLElement).closest<HTMLElement>(
+            ".search-result",
+        );
+        if (target) {
+            const idx = parseInt(target.dataset.index ?? "-1", 10);
+            if (idx !== selectedIndex) {
+                selectedIndex = idx;
+                renderResults();
+            }
+        }
+    });
+</script>

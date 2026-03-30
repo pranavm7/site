@@ -1,0 +1,60 @@
+---
+interface Props {
+  currentPath: string;
+}
+const { currentPath } = Astro.props;
+
+// Derive a display label from the current path
+function pathToTabLabel(path: string): string {
+  if (path === '/') return 'index.astro';
+  const parts = path.replace(/^\//, '').split('/');
+  const last = parts[parts.length - 1];
+  if (!last) return 'index.astro';
+  // if it looks like a slug (no extension) add .md for blog posts
+  if (parts[0] === 'blog' && parts.length > 1) return `${last}.md`;
+  // cv sub-pages
+  if (parts[0] === 'cv') return parts.length > 1 ? `${last}.astro` : 'index.astro';
+  return `${last}.astro`;
+}
+
+const tabLabel = pathToTabLabel(currentPath);
+const tabDir   = currentPath === '/'
+  ? ''
+  : '/' + currentPath.replace(/^\//, '').split('/')[0];
+---
+
+<div id="tabbar" role="tablist" aria-label="Open files" data-pagefind-ignore>
+  <button
+    id="sidebar-toggle"
+    aria-label="Toggle sidebar"
+    aria-controls="sidebar"
+    title="Toggle sidebar (Ctrl+B)"
+  >☰</button>
+
+  <!-- Active tab mirrors the current page -->
+  <a
+    class="tab active"
+    href={currentPath}
+    role="tab"
+    aria-selected="true"
+    aria-current="page"
+  >
+    <span class="tab-dot" aria-hidden="true">●</span>
+    <span class="tab-path">{tabDir && <span class="tab-dir">{tabDir}/</span>}{tabLabel}</span>
+  </a>
+
+  <!-- Search trigger — styled as a vim `/` command prompt -->
+  <button
+    id="search-btn"
+    class="search-btn"
+    aria-label="Search site (press / to open)"
+    title="Search (/)">
+    <span class="search-btn-slash" aria-hidden="true">/</span>
+    <span class="search-btn-label">search...</span>
+  </button>
+
+  <div id="tabbar-actions">
+    <button id="theme-toggle" aria-haspopup="dialog" title="Change theme">🎨 theme</button>
+    <button id="help-btn"    aria-haspopup="dialog" title="Keyboard shortcuts (?)">? help</button>
+  </div>
+</div>

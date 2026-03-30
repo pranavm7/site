@@ -1,0 +1,417 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Home" currentPath="/">
+    <style>
+        .home-wrap {
+            min-height: calc(100vh - 54px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            gap: 32px;
+        }
+
+        .hero-name {
+            font-size: clamp(28px, 5vw, 44px);
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        .hero-sub {
+            font-size: 14px;
+            color: var(--accent2);
+            text-align: center;
+            margin-top: 6px;
+        }
+        .hero-desc {
+            max-width: 540px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-top: 10px;
+        }
+
+        .terminal-card {
+            width: 100%;
+            max-width: 540px;
+            border: 1px solid var(--border);
+            background: var(--bg-alt);
+            overflow: hidden;
+        }
+        .terminal-titlebar {
+            background: var(--bg-panel);
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tbar-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .tbar-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .tbar-dot.red {
+            background: var(--red);
+        }
+        .tbar-dot.yellow {
+            background: var(--yellow);
+        }
+        .tbar-dot.green {
+            background: var(--green);
+        }
+        .tbar-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .terminal-body {
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 2;
+        }
+        .t-prompt {
+            color: var(--green);
+        }
+        .t-cmd {
+            color: var(--text);
+        }
+        .t-out {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text-muted);
+        }
+        .t-out-val {
+            color: var(--text);
+        }
+        .t-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--accent);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .t-line {
+            opacity: 0;
+            animation: fadeIn 0.01s forwards;
+        }
+        .t-line:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        .t-line:nth-child(2) {
+            animation-delay: 0.8s;
+        }
+        .t-line:nth-child(3) {
+            animation-delay: 1.2s;
+        }
+        .t-line:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+        .t-line:nth-child(5) {
+            animation-delay: 1.8s;
+        }
+        .t-line:nth-child(6) {
+            animation-delay: 2.1s;
+        }
+        .t-line:nth-child(7) {
+            animation-delay: 2.5s;
+        }
+        .t-line:nth-child(8) {
+            animation-delay: 2.8s;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .theme-carousel {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            max-width: 540px;
+        }
+        .carousel-arrow {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .carousel-arrow:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .carousel-label {
+            flex: 1;
+            text-align: center;
+            font-size: 13px;
+            color: var(--accent2);
+        }
+
+        .stats-row {
+            display: flex;
+            width: 100%;
+            max-width: 540px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .stat-cell {
+            flex: 1;
+            padding: 18px 12px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+        .stat-cell:last-child {
+            border-right: none;
+        }
+        .stat-num {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 22px;
+            border: 1px solid;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            background: none;
+            transition: background 0.15s;
+        }
+        .cta-btn.primary {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .cta-btn.primary:hover {
+            background: var(--bg-panel);
+            text-decoration: none;
+        }
+        .cta-btn.secondary {
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+        .cta-btn.secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .support-bar {
+            width: 100%;
+            max-width: 540px;
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .support-bar a {
+            color: var(--accent);
+        }
+    </style>
+
+    <div class="home-wrap">
+        <div style="text-align:center;">
+            <div class="hero-name">Pranav Mahajan</div>
+            <div class="hero-sub">Cybersecurity and Software Engineering</div>
+            <p class="hero-desc">
+                Welcome to my cyberspace. A terminal-inspired showcase of my
+                journey through building & breaking technology. Explore my
+                experiences, projects, and the things I build!
+            </p>
+        </div>
+
+        <div class="terminal-card">
+            <div class="terminal-titlebar">
+                <div class="tbar-dots">
+                    <div class="tbar-dot red"></div>
+                    <div class="tbar-dot yellow"></div>
+                    <div class="tbar-dot green"></div>
+                </div>
+                <span class="tbar-label">zsh — ~/home</span>
+            </div>
+            <div class="terminal-body">
+                <div class="t-line">
+                    <span class="t-prompt">root@dev</span><span class="t-cmd"
+                        >:~$ cd /root/</span
+                    >
+                </div>
+                <div class="t-line">
+                    <span class="t-prompt">root@dev</span><span class="t-cmd"
+                        >:~$ whoami</span
+                    >
+                </div>
+                <div class="t-line">
+                    <div class="t-out">
+                        <span>🎓</span><span
+                            >University: <span class="t-out-val"
+                                >University of Cincinnati</span
+                            ></span
+                        >
+                    </div>
+                </div>
+                <div class="t-line">
+                    <div class="t-out">
+                        <span>💼</span><span
+                            >Expertise: <span class="t-out-val"
+                                >Offensive Security &amp; Software Engineering
+                            </span></span
+                        >
+                    </div>
+                </div>
+                <!-- <div class="t-line">
+                    <div class="t-out">
+                        <span>📚</span><span
+                            >GPA: <span class="t-out-val">4.0</span></span
+                        >
+                    </div>
+                </div> -->
+                <div class="t-line">
+                    <span class="t-prompt">user@dev</span><span class="t-cmd"
+                        >:~$ ./portfolio --interactive</span
+                    >
+                </div>
+                <div
+                    class="t-line"
+                    style="color:var(--green);font-weight:bold;"
+                >
+                    Launching interactive CV... ✓
+                </div>
+                <div class="t-line">
+                    <span class="t-prompt">user@dev</span><span class="t-cmd"
+                        >:~$ <span class="t-cursor"></span></span
+                    >
+                </div>
+            </div>
+        </div>
+
+        <div class="theme-carousel">
+            <button class="carousel-arrow" id="theme-prev">‹</button>
+            <div class="carousel-label" id="carousel-name">
+                🎨 Catppuccin Mocha
+            </div>
+            <button class="carousel-arrow" id="theme-next">›</button>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-cell">
+                <span class="stat-num">???</span><span class="stat-label"
+                    >Languages Used</span
+                >
+            </div>
+            <div class="stat-cell">
+                <span class="stat-num">???</span><span class="stat-label"
+                    >Major Projects</span
+                >
+            </div>
+            <div class="stat-cell">
+                <span class="stat-num">???</span><span class="stat-label"
+                    >Technologies</span
+                >
+            </div>
+        </div>
+
+        <div class="cta-row">
+            <a class="cta-btn primary" href="/cv">👨‍💻 View Interactive CV →</a>
+            <a class="cta-btn secondary" href="/blog">📝 Browse Blog</a>
+        </div>
+
+        <div class="support-bar">
+            <span style="color:var(--yellow)">⭐</span>
+            <span
+                >Support the <a
+                    href="https://github.com/webtui/webtui"
+                    target="_blank"
+                    rel="noopener">WebTUI Framework</a
+                > ↗</span
+            >
+        </div>
+    </div>
+
+    <script>
+        const themes = [
+            { id: "catppuccin-mocha", name: "🎨 Catppuccin Mocha" },
+            { id: "nord", name: "🧊 Nord" },
+            { id: "dracula", name: "🧛 Dracula" },
+            { id: "tokyo-night", name: "🌃 Tokyo Night" },
+            { id: "gruvbox", name: "🪵 Gruvbox" },
+        ];
+        const label = document.getElementById("carousel-name");
+        let idx = Math.max(
+            0,
+            themes.findIndex(
+                (t) =>
+                    t.id ===
+                    (localStorage.getItem("theme") || "catppuccin-mocha"),
+            ),
+        );
+        if (label) label.textContent = themes[idx].name;
+
+        function applyCarousel(i) {
+            idx = ((i % themes.length) + themes.length) % themes.length;
+            const t = themes[idx];
+            document.documentElement.dataset.theme = t.id;
+            localStorage.setItem("theme", t.id);
+            if (label) label.textContent = t.name;
+            const sb = document.getElementById("status-theme");
+            if (sb) sb.textContent = t.id;
+            document.querySelectorAll(".theme-option").forEach((b) => {
+                b.classList.toggle("active", b.dataset.theme === t.id);
+            });
+        }
+        document
+            .getElementById("theme-prev")
+            ?.addEventListener("click", () => applyCarousel(idx - 1));
+        document
+            .getElementById("theme-next")
+            ?.addEventListener("click", () => applyCarousel(idx + 1));
+    </script>
+</BaseLayout>

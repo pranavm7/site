@@ -1,0 +1,24 @@
+---
+import BaseLayout from './BaseLayout.astro';
+const { title, date, tags = [], slug } = Astro.props;
+---
+
+<BaseLayout title={title} currentPath={`/blog/${slug}`}>
+  <div class="post-page">
+    <a class="back-link" href="/blog">← back to blog</a>
+
+    <div class="post-header">
+      <h1>{title}</h1>
+      <div class="meta">
+        <span>{date}</span>
+        {tags.map((tag: string) => (
+          <span style="border:1px solid var(--border);padding:1px 8px;color:var(--accent2);border-color:var(--accent2);font-size:11px;">{tag}</span>
+        ))}
+      </div>
+    </div>
+
+    <div class="post-body">
+      <slot />
+    </div>
+  </div>
+</BaseLayout>
