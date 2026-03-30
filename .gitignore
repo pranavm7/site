@@ -1,0 +1,11 @@
+# dist directory is side effect of build
+dist
+
+# node modules are the dependencies
+node_modules
+
+# .astro is the build file
+.astro
+
+# dependecy lock
+package-lock.json
