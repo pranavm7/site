@@ -1,263 +1,373 @@
 ---
-import '../styles/global.css';
-import Sidebar     from '../components/Sidebar.astro';
-import Tabbar      from '../components/Tabbar.astro';
-import Statusbar   from '../components/Statusbar.astro';
-import SearchModal from '../components/SearchModal.astro';
+import "../styles/global.css";
+import Sidebar from "../components/Sidebar.astro";
+import Tabbar from "../components/Tabbar.astro";
+import Statusbar from "../components/Statusbar.astro";
+import SearchModal from "../components/SearchModal.astro";
 
 interface Props {
-  title?:       string;
-  currentPath?: string;
+    title?: string;
+    currentPath?: string;
 }
-const { title = 'dev.blog', currentPath = '/' } = Astro.props;
+const { title = "pranavm.net", currentPath = "/" } = Astro.props;
 
 const themes = [
-  { id: 'catppuccin-mocha', name: 'Catppuccin Mocha', color: '#89b4fa' },
-  { id: 'nord',             name: 'Nord',             color: '#88c0d0' },
-  { id: 'dracula',          name: 'Dracula',          color: '#bd93f9' },
-  { id: 'tokyo-night',      name: 'Tokyo Night',      color: '#7aa2f7' },
-  { id: 'gruvbox',          name: 'Gruvbox',          color: '#83a598' },
+    { id: "catppuccin-mocha", name: "Catppuccin Mocha", color: "#89b4fa" },
+    { id: "nord", name: "Nord", color: "#88c0d0" },
+    { id: "dracula", name: "Dracula", color: "#bd93f9" },
+    { id: "tokyo-night", name: "Tokyo Night", color: "#7aa2f7" },
+    { id: "gruvbox", name: "Gruvbox", color: "#83a598" },
 ];
 ---
 
 <!doctype html>
 <html lang="en" data-theme="catppuccin-mocha">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title} — dev.blog</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title} — pranavm.net</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        />
+    </head>
+    <body>
+        <!-- ─── App shell ─── -->
+        <div id="shell">
+            <Sidebar currentPath={currentPath} />
 
-<!-- ─── App shell ─── -->
-<div id="shell">
-  <Sidebar currentPath={currentPath} />
+            <div id="main">
+                <Tabbar currentPath={currentPath} />
+                <div id="content" data-pagefind-body><slot /></div>
+                <Statusbar currentPath={currentPath} />
+            </div>
+        </div>
 
-  <div id="main">
-    <Tabbar    currentPath={currentPath} />
-    <div id="content" data-pagefind-body><slot /></div>
-    <Statusbar currentPath={currentPath} />
-  </div>
-</div>
+        <!-- ─── Mobile sidebar backdrop ─── -->
+        <div id="sidebar-overlay" aria-hidden="true"></div>
 
-<!-- ─── Mobile sidebar backdrop ─── -->
-<div id="sidebar-overlay" aria-hidden="true"></div>
+        <!-- ─── Search modal ─── -->
+        <SearchModal />
 
-<!-- ─── Search modal ─── -->
-<SearchModal />
-
-<!-- ─── Theme modal ─── -->
-<div id="theme-modal" role="dialog" aria-modal="true" aria-label="Theme selector" aria-hidden="true" data-pagefind-ignore>
-  <div id="theme-modal-inner">
-    <div id="theme-modal-header">
-      🎨 Theme Configuration
-      <button id="theme-modal-close" aria-label="Close theme picker">✕</button>
-    </div>
-    <div id="theme-modal-body">
-      {themes.map(t => (
-        <button
-          class={`theme-option${t.id === 'catppuccin-mocha' ? ' active' : ''}`}
-          data-theme={t.id}
-          aria-pressed={t.id === 'catppuccin-mocha' ? 'true' : 'false'}
+        <!-- ─── Theme modal ─── -->
+        <div
+            id="theme-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Theme selector"
+            aria-hidden="true"
+            data-pagefind-ignore
         >
-          <span class="swatch" style={`background:${t.color}`} aria-hidden="true"></span>
-          {t.name}
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
+            <div id="theme-modal-inner">
+                <div id="theme-modal-header">
+                    🎨 Theme Configuration
+                    <button
+                        id="theme-modal-close"
+                        aria-label="Close theme picker">✕</button
+                    >
+                </div>
+                <div id="theme-modal-body">
+                    {
+                        themes.map((t) => (
+                            <button
+                                class={`theme-option${t.id === "catppuccin-mocha" ? " active" : ""}`}
+                                data-theme={t.id}
+                                aria-pressed={
+                                    t.id === "catppuccin-mocha"
+                                        ? "true"
+                                        : "false"
+                                }
+                            >
+                                <span
+                                    class="swatch"
+                                    style={`background:${t.color}`}
+                                    aria-hidden="true"
+                                />
+                                {t.name}
+                            </button>
+                        ))
+                    }
+                </div>
+            </div>
+        </div>
 
-<!-- ─── Help modal ─── -->
-<div id="help-modal" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" aria-hidden="true" data-pagefind-ignore>
-  <div id="help-modal-inner">
-    <div class="help-header">
-      ⌨ Keyboard Shortcuts
-      <button class="help-close" id="help-close" aria-label="Close help">✕</button>
-    </div>
-    <div class="help-body">
-      <div class="help-grid">
-        <div class="help-row"><kbd class="help-key">Ctrl+B</kbd><span class="help-desc">Toggle sidebar</span></div>
-        <div class="help-row"><kbd class="help-key">?</kbd>      <span class="help-desc">Show help</span></div>
-        <div class="help-row"><kbd class="help-key">/</kbd>      <span class="help-desc">Search</span></div>
-        <div class="help-row"><kbd class="help-key">Esc</kbd>    <span class="help-desc">Close modal</span></div>
-        <div class="help-row"><kbd class="help-key">T</kbd>      <span class="help-desc">Theme picker</span></div>
-        <div class="help-row"><kbd class="help-key">Alt+←</kbd>  <span class="help-desc">Go back</span></div>
-        <div class="help-row"><kbd class="help-key">G</kbd>      <span class="help-desc">Blog index</span></div>
-      </div>
-    </div>
-  </div>
-</div>
+        <!-- ─── Help modal ─── -->
+        <div
+            id="help-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Keyboard shortcuts"
+            aria-hidden="true"
+            data-pagefind-ignore
+        >
+            <div id="help-modal-inner">
+                <div class="help-header">
+                    ⌨ Keyboard Shortcuts
+                    <button
+                        class="help-close"
+                        id="help-close"
+                        aria-label="Close help">✕</button
+                    >
+                </div>
+                <div class="help-body">
+                    <div class="help-grid">
+                        <div class="help-row">
+                            <kbd class="help-key">Ctrl+B</kbd><span
+                                class="help-desc">Toggle sidebar</span
+                            >
+                        </div>
+                        <div class="help-row">
+                            <kbd class="help-key">?</kbd>
+                            <span class="help-desc">Show help</span>
+                        </div>
+                        <div class="help-row">
+                            <kbd class="help-key">/</kbd>
+                            <span class="help-desc">Search</span>
+                        </div>
+                        <div class="help-row">
+                            <kbd class="help-key">Esc</kbd>
+                            <span class="help-desc">Close modal</span>
+                        </div>
+                        <div class="help-row">
+                            <kbd class="help-key">T</kbd>
+                            <span class="help-desc">Theme picker</span>
+                        </div>
+                        <div class="help-row">
+                            <kbd class="help-key">Alt+←</kbd>
+                            <span class="help-desc">Go back</span>
+                        </div>
+                        <div class="help-row">
+                            <kbd class="help-key">G</kbd>
+                            <span class="help-desc">Blog index</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<script>
-// ─────────────────────────────────────────────
-// Utilities
-// ─────────────────────────────────────────────
-const $ = <T extends Element>(id: string) => document.getElementById(id) as T | null;
-const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
+        <script>
+            // ─────────────────────────────────────────────
+            // Utilities
+            // ─────────────────────────────────────────────
+            const $ = <T extends Element>(id: string) =>
+                document.getElementById(id) as T | null;
+            const MOBILE_MQ = window.matchMedia("(max-width: 768px)");
 
-// ─────────────────────────────────────────────
-// Clock
-// ─────────────────────────────────────────────
-function tick() {
-  const el = $('status-time');
-  if (el) el.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-}
-tick();
-setInterval(tick, 10_000);
+            // ─────────────────────────────────────────────
+            // Clock
+            // ─────────────────────────────────────────────
+            function tick() {
+                const el = $("status-time");
+                if (el)
+                    el.textContent = new Date().toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    });
+            }
+            tick();
+            setInterval(tick, 10_000);
 
-// ─────────────────────────────────────────────
-// Theme
-// ─────────────────────────────────────────────
-const html = document.documentElement;
-let activeTheme = localStorage.getItem('theme') ?? 'catppuccin-mocha';
+            // ─────────────────────────────────────────────
+            // Theme
+            // ─────────────────────────────────────────────
+            const html = document.documentElement;
+            let activeTheme =
+                localStorage.getItem("theme") ?? "catppuccin-mocha";
 
-function applyTheme(theme: string) {
-  activeTheme = theme;
-  html.dataset.theme = theme;
-  localStorage.setItem('theme', theme);
-  const statusEl = $('status-theme');
-  if (statusEl) statusEl.textContent = theme;
-  document.querySelectorAll<HTMLButtonElement>('.theme-option').forEach(btn => {
-    const active = btn.dataset.theme === theme;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-pressed', String(active));
-  });
-}
+            function applyTheme(theme: string) {
+                activeTheme = theme;
+                html.dataset.theme = theme;
+                localStorage.setItem("theme", theme);
+                const statusEl = $("status-theme");
+                if (statusEl) statusEl.textContent = theme;
+                document
+                    .querySelectorAll<HTMLButtonElement>(".theme-option")
+                    .forEach((btn) => {
+                        const active = btn.dataset.theme === theme;
+                        btn.classList.toggle("active", active);
+                        btn.setAttribute("aria-pressed", String(active));
+                    });
+            }
 
-applyTheme(activeTheme);
+            applyTheme(activeTheme);
 
-document.querySelectorAll<HTMLButtonElement>('.theme-option').forEach(btn => {
-  btn.addEventListener('click', () => { if (btn.dataset.theme) applyTheme(btn.dataset.theme); });
-});
+            document
+                .querySelectorAll<HTMLButtonElement>(".theme-option")
+                .forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        if (btn.dataset.theme) applyTheme(btn.dataset.theme);
+                    });
+                });
 
-// ─────────────────────────────────────────────
-// Modal helpers
-// ─────────────────────────────────────────────
-function openModal(el: HTMLElement | null) {
-  if (!el) return;
-  el.classList.add('open');
-  el.setAttribute('aria-hidden', 'false');
-  // Focus first focusable element inside
-  el.querySelector<HTMLElement>('button, [href], input')?.focus();
-}
+            // ─────────────────────────────────────────────
+            // Modal helpers
+            // ─────────────────────────────────────────────
+            function openModal(el: HTMLElement | null) {
+                if (!el) return;
+                el.classList.add("open");
+                el.setAttribute("aria-hidden", "false");
+                // Focus first focusable element inside
+                el.querySelector<HTMLElement>("button, [href], input")?.focus();
+            }
 
-function closeModal(el: HTMLElement | null) {
-  if (!el) return;
-  el.classList.remove('open');
-  el.setAttribute('aria-hidden', 'true');
-}
+            function closeModal(el: HTMLElement | null) {
+                if (!el) return;
+                el.classList.remove("open");
+                el.setAttribute("aria-hidden", "true");
+            }
 
-// Theme modal
-const themeModal = $('theme-modal');
-$('open-theme-modal')?.addEventListener('click', () => openModal(themeModal));
-$('theme-toggle')    ?.addEventListener('click', () => openModal(themeModal));
-$('theme-modal-close')?.addEventListener('click', () => closeModal(themeModal));
-themeModal?.addEventListener('click', e => { if (e.target === themeModal) closeModal(themeModal); });
+            // Theme modal
+            const themeModal = $("theme-modal");
+            $("open-theme-modal")?.addEventListener("click", () =>
+                openModal(themeModal),
+            );
+            $("theme-toggle")?.addEventListener("click", () =>
+                openModal(themeModal),
+            );
+            $("theme-modal-close")?.addEventListener("click", () =>
+                closeModal(themeModal),
+            );
+            themeModal?.addEventListener("click", (e) => {
+                if (e.target === themeModal) closeModal(themeModal);
+            });
 
-// Help modal
-const helpModal = $('help-modal');
-$('help-btn')  ?.addEventListener('click', () => openModal(helpModal));
-$('help-close')?.addEventListener('click', () => closeModal(helpModal));
-helpModal?.addEventListener('click', e => { if (e.target === helpModal) closeModal(helpModal); });
+            // Help modal
+            const helpModal = $("help-modal");
+            $("help-btn")?.addEventListener("click", () =>
+                openModal(helpModal),
+            );
+            $("help-close")?.addEventListener("click", () =>
+                closeModal(helpModal),
+            );
+            helpModal?.addEventListener("click", (e) => {
+                if (e.target === helpModal) closeModal(helpModal);
+            });
 
-// Search modal — calls into SearchModal.astro's exposed functions
-const openSearch  = () => (window as any).__searchOpen?.();
-const closeSearch = () => (window as any).__searchClose?.();
-$('search-btn')?.addEventListener('click', openSearch);
+            // Search modal — calls into SearchModal.astro's exposed functions
+            const openSearch = () => (window as any).__searchOpen?.();
+            const closeSearch = () => (window as any).__searchClose?.();
+            $("search-btn")?.addEventListener("click", openSearch);
 
-// ─────────────────────────────────────────────
-// Sidebar
-// ─────────────────────────────────────────────
-const shell   = $('shell');
-const sidebar = $<HTMLElement>('sidebar');
-const overlay = $('sidebar-overlay');
+            // ─────────────────────────────────────────────
+            // Sidebar
+            // ─────────────────────────────────────────────
+            const shell = $("shell");
+            const sidebar = $<HTMLElement>("sidebar");
+            const overlay = $("sidebar-overlay");
 
-function isMobile() { return MOBILE_MQ.matches; }
+            function isMobile() {
+                return MOBILE_MQ.matches;
+            }
 
-function openSidebar() {
-  if (isMobile()) {
-    sidebar?.classList.add('mobile-open');
-    overlay?.classList.add('visible');
-    overlay?.removeAttribute('aria-hidden');
-  } else {
-    shell?.classList.remove('sidebar-collapsed');
-  }
-}
+            function openSidebar() {
+                if (isMobile()) {
+                    sidebar?.classList.add("mobile-open");
+                    overlay?.classList.add("visible");
+                    overlay?.removeAttribute("aria-hidden");
+                } else {
+                    shell?.classList.remove("sidebar-collapsed");
+                }
+            }
 
-function closeSidebar() {
-  if (isMobile()) {
-    sidebar?.classList.remove('mobile-open');
-    overlay?.classList.remove('visible');
-    overlay?.setAttribute('aria-hidden', 'true');
-  } else {
-    shell?.classList.add('sidebar-collapsed');
-  }
-}
+            function closeSidebar() {
+                if (isMobile()) {
+                    sidebar?.classList.remove("mobile-open");
+                    overlay?.classList.remove("visible");
+                    overlay?.setAttribute("aria-hidden", "true");
+                } else {
+                    shell?.classList.add("sidebar-collapsed");
+                }
+            }
 
-function toggleSidebar() {
-  if (isMobile()) {
-    sidebar?.classList.contains('mobile-open') ? closeSidebar() : openSidebar();
-  } else {
-    shell?.classList.contains('sidebar-collapsed') ? openSidebar() : closeSidebar();
-  }
-}
+            function toggleSidebar() {
+                if (isMobile()) {
+                    sidebar?.classList.contains("mobile-open")
+                        ? closeSidebar()
+                        : openSidebar();
+                } else {
+                    shell?.classList.contains("sidebar-collapsed")
+                        ? openSidebar()
+                        : closeSidebar();
+                }
+            }
 
-$('sidebar-toggle')?.addEventListener('click', toggleSidebar);
-$('sidebar-close') ?.addEventListener('click', closeSidebar);
-overlay            ?.addEventListener('click', closeSidebar);
+            $("sidebar-toggle")?.addEventListener("click", toggleSidebar);
+            $("sidebar-close")?.addEventListener("click", closeSidebar);
+            overlay?.addEventListener("click", closeSidebar);
 
-// On resize: clean up whichever mode is no longer active
-MOBILE_MQ.addEventListener('change', e => {
-  if (!e.matches) {
-    // Switched to desktop — clear mobile state
-    sidebar?.classList.remove('mobile-open');
-    overlay?.classList.remove('visible');
-    overlay?.setAttribute('aria-hidden', 'true');
-  } else {
-    // Switched to mobile — clear desktop state
-    shell?.classList.remove('sidebar-collapsed');
-  }
-});
+            // On resize: clean up whichever mode is no longer active
+            MOBILE_MQ.addEventListener("change", (e) => {
+                if (!e.matches) {
+                    // Switched to desktop — clear mobile state
+                    sidebar?.classList.remove("mobile-open");
+                    overlay?.classList.remove("visible");
+                    overlay?.setAttribute("aria-hidden", "true");
+                } else {
+                    // Switched to mobile — clear desktop state
+                    shell?.classList.remove("sidebar-collapsed");
+                }
+            });
 
-// ─────────────────────────────────────────────
-// Tree section collapse
-// ─────────────────────────────────────────────
-document.querySelectorAll<HTMLElement>('.tree-label').forEach(label => {
-  const id      = label.dataset.section;
-  const content = id ? document.getElementById(`sec-${id}`) : null;
+            // ─────────────────────────────────────────────
+            // Tree section collapse
+            // ─────────────────────────────────────────────
+            document
+                .querySelectorAll<HTMLElement>(".tree-label")
+                .forEach((label) => {
+                    const id = label.dataset.section;
+                    const content = id
+                        ? document.getElementById(`sec-${id}`)
+                        : null;
 
-  label.addEventListener('click', () => {
-    const expanded = label.getAttribute('aria-expanded') === 'true';
-    label.setAttribute('aria-expanded', String(!expanded));
-    label.classList.toggle('open', !expanded);
-    if (content) content.style.display = expanded ? 'none' : '';
-  });
+                    label.addEventListener("click", () => {
+                        const expanded =
+                            label.getAttribute("aria-expanded") === "true";
+                        label.setAttribute("aria-expanded", String(!expanded));
+                        label.classList.toggle("open", !expanded);
+                        if (content)
+                            content.style.display = expanded ? "none" : "";
+                    });
 
-  // Start open
-  label.setAttribute('aria-expanded', 'true');
-  label.classList.add('open');
-});
+                    // Start open
+                    label.setAttribute("aria-expanded", "true");
+                    label.classList.add("open");
+                });
 
-// ─────────────────────────────────────────────
-// Keyboard shortcuts
-// ─────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  const tag = (document.activeElement as HTMLElement).tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+            // ─────────────────────────────────────────────
+            // Keyboard shortcuts
+            // ─────────────────────────────────────────────
+            document.addEventListener("keydown", (e) => {
+                const tag = (document.activeElement as HTMLElement).tagName;
+                if (tag === "INPUT" || tag === "TEXTAREA") return;
 
-  if (e.key === 'Escape')              { closeModal(themeModal); closeModal(helpModal); closeSearch(); }
-  if (e.key === '/' && !e.ctrlKey)     { e.preventDefault(); openSearch(); }
-  if (e.key === '?' && !e.ctrlKey)     { openModal(helpModal); }
-  if (e.key === 't' || e.key === 'T')  { openModal(themeModal); }
-  if (e.ctrlKey && e.key === 'b')      { e.preventDefault(); toggleSidebar(); }
-  if (e.key === 'g' || e.key === 'G')  { window.location.href = '/blog'; }
-  if (e.altKey && e.key === 'ArrowLeft') { history.back(); }
-});
-</script>
-
-</body>
+                if (e.key === "Escape") {
+                    closeModal(themeModal);
+                    closeModal(helpModal);
+                    closeSearch();
+                }
+                if (e.key === "/" && !e.ctrlKey) {
+                    e.preventDefault();
+                    openSearch();
+                }
+                if (e.key === "?" && !e.ctrlKey) {
+                    openModal(helpModal);
+                }
+                if (e.key === "t" || e.key === "T") {
+                    openModal(themeModal);
+                }
+                if (e.ctrlKey && e.key === "b") {
+                    e.preventDefault();
+                    toggleSidebar();
+                }
+                if (e.key === "g" || e.key === "G") {
+                    window.location.href = "/blog";
+                }
+                if (e.altKey && e.key === "ArrowLeft") {
+                    history.back();
+                }
+            });
+        </script>
+    </body>
 </html>

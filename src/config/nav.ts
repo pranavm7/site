@@ -10,7 +10,7 @@
  *   - External links
  */
 
-export const SITE_TITLE = "~/dev.blog";
+export const SITE_TITLE = "~/pranavm.net";
 
 /**
  * Metadata for each CV page.
